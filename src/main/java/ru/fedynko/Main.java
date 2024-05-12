@@ -1,13 +1,14 @@
 package ru.fedynko;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import ru.fedynko.service.MainService;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
 
-@ComponentScan
+@SpringBootApplication
 public class Main {
     public static void main(String[] args) {
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Main.class);
+        ConfigurableApplicationContext context = SpringApplication.run(Main.class, args);
         MainService mainService = context.getBean(MainService.class);
         mainService.doTestOperations();
     }

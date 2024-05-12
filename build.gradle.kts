@@ -12,20 +12,12 @@ repositories {
 }
 
 dependencies {
-//    implementation ("org.springframework.boot:spring-boot-starter-web")
-//    implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
 
-    //Spring base
-    implementation("org.springframework:spring-context")
-
-    //Data base
-    implementation("org.springframework:spring-jdbc")
+    implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("com.h2database:h2")
-    implementation("com.zaxxer:HikariCP:5.0.1")
 
-
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+//    testImplementation(platform("org.junit:junit-bom:5.9.1"))
+//    testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
 tasks.test {

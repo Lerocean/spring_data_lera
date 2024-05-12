@@ -1,68 +1,71 @@
 package ru.fedynko.service;
 
-import java.sql.Types;
 import java.util.List;
-import ru.fedynko.model.User;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.fedynko.entity.User;
+import ru.fedynko.repository.UserRepository;
 
 @Service
 public class MainService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private static final Logger logger = LoggerFactory.getLogger(MainService.class.getName());
 
-    public MainService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    private final UserRepository userRepository;
+
+    public MainService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public void doTestOperations() {
-        createUserTable();
-        createUser(new User("Lera", "Fedynko", 18));
-        getAllUsers().forEach(System.out::println);
-        updateUser(new User("Lera", "Fedynko", 19));
-        System.out.println("Table updated");
-        deleteUser(new User("Lera", "Fedynko", 19));
-        System.out.println("Table is empty");
+        User lera = createUser(new User("Lera", "Fedynko", 18));
+        logger.info("OPERATION create LERA!");
+        getAllUsers().forEach(user -> logger.info(user.toString()));
+
+        lera.setAge(19);
+        updateUser(lera);
+        logger.info("OPERATION update!");
+        getAllUsers().forEach(user -> logger.info(user.toString()));
+
+        User sasha = createUser(new User("Sasha", "Shumilin", 34));
+        logger.info("OPERATION create SASHA!");
+        getAllUsers().forEach(user -> logger.info(user.toString()));
+
+        deleteUser(sasha);
+        logger.info("OPERATION delete!");
+        getAllUsers().forEach(user -> logger.info(user.toString()));
+
+
+        User foundedByParameter = findByParameter(lera.getName());
+        logger.info("OPERATION findByParameter!");
+        logger.info("Founded user: {}", foundedByParameter);
+
+        createUser(new User("qwe", "asd", 99));
+        createUser(new User("qwe", "zxc", 88));
+        createUser(new User("qwe", "fgf", 77));
+        logger.info("CREATE 3 USER");
+        userRepository.findAllByName("qwe").forEach(user -> logger.info(user.toString()));
+
+    }
+
+    private User findByParameter(String name) {
+        return userRepository.findByName(name);
     }
 
     public List<User> getAllUsers() {
-        String sql = "SELECT * FROM users";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-            String name = rs.getString("name");
-            String family = rs.getString("family");
-            int age = rs.getInt("age");
-            return new User(name, family, age);
-        });
+        return userRepository.findAll();
     }
 
-    public void createUser(User user) {
-        String sql = "INSERT INTO users (name, family, age) VALUES (?,?,?)";
-        Object[] params = {user.getName(), user.getFamily(), user.getAge()};
-        int[] types = {Types.VARCHAR, Types.VARCHAR, Types.INTEGER};
-        jdbcTemplate.update(sql, params, types);
+    public User createUser(User user) {
+        return userRepository.save(user);
     }
 
-    public void updateUser(User user) {
-        String sql = "UPDATE users SET age = ? WHERE name = ? AND family = ?";
-        Object[] params = {user.getAge(), user.getName(), user.getFamily()};
-        int[] types = {Types.INTEGER, Types.VARCHAR, Types.VARCHAR};
-        jdbcTemplate.update(sql, params, types);
+    public User updateUser(User user) {
+        return userRepository.save(user);
     }
 
     public void deleteUser(User user) {
-        String sql = "DELETE FROM users WHERE name = ? AND family = ?";
-        Object[] params = {user.getName(), user.getFamily()};
-        int[] types = {Types.VARCHAR, Types.VARCHAR};
-        jdbcTemplate.update(sql, params, types);
-    }
-
-    private void createUserTable() {
-        String sql = "CREATE TABLE Users (" +
-                "    name VARCHAR(255)," +
-                "    family VARCHAR(255)," +
-                "    age INT" +
-                ")";
-        jdbcTemplate.execute(sql);
-        System.out.println("Table Users created successfully.");
+        userRepository.delete(user);
     }
 }
